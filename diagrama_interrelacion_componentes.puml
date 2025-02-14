@@ -1,0 +1,38 @@
+@startuml
+
+actor "Usuario" as User
+actor "Sistema Cliente" as Client
+
+Client -> "Servidor de Autorización" : Solicitar Autorización (Client ID, Redirect URI) 
+"Servidor de Autorización" -> User : Redirigir para Autenticación
+User --> "Servidor de Autorización" : Proveer Credenciales 
+"Servidor de Autorización" --> User : Solicitar Consentimiento 
+User -> "Servidor de Autorización" : Otorgar Consentimiento
+"Servidor de Autorización" --> Client : Redirigir con Código de Autorización
+
+Client -> "Servidor de Autorización" : Intercambiar Código por Token (Client ID, Client Secret) 
+"Servidor de Autorización" --> Client : Emitir Token de Acceso y Refresh Token
+
+Client -> "API Gateway" : Solicitud con Token OAuth 2.0 
+"API Gateway" -> "Servidor de Autorización" : Validar Token 
+"Servidor de Autorización" --> "API Gateway" : Token Válido
+
+"API Gateway" -> "Sistema de Reconocimiento Facial" : Enviar Datos Faciales para Validación
+"Sistema de Reconocimiento Facial" -> "Base de Datos de Reconocimiento Facial" : Consultar/Comparar Datos Faciales 
+"Base de Datos de Reconocimiento Facial" --> "Sistema de Reconocimiento Facial" : Resultado de la Comparación 
+"Sistema de Reconocimiento Facial" --> "API Gateway" : Resultado de la Validación Facial
+
+"API Gateway" -> "Microservicio Consulta Movimientos" : Redirigir Solicitud "API Gateway" -> "Microservicio Transferecias" : Redirigir Solicitud
+"API Gateway" -> "Microservicio Datos Básicos" : Redirigir Solicitud
+
+"Microservicio Consulta Movimientos" -> "Base de Datos Core Bancario" : Consultar/Actualizar Datos 
+"Microservicio Transferecias" -> "Base de Datos Core Bancario" : Consultar/Actualizar Datos 
+"Microservicio Datos Básicos" -> "Base de Datos Core Bancario" : Consultar/Actualizar Datos
+
+"Microservicio Consulta Movimientos" --> "API Gateway" : Respuesta 
+"Microservicio Transferecias" --> "API Gateway" : Respuesta 
+"Microservicio Datos Básicos" --> "API Gateway" : Respuesta
+
+"API Gateway" --> Client : Responder al Sistema Cliente
+
+@enduml

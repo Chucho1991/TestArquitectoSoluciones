@@ -1,0 +1,53 @@
+@startuml
+!define RECTANGLE class
+!define PACKAGE package
+!define COMPONENT component
+!define CLOUD cloud
+!define DATABASE database
+!define ACTOR actor
+
+title Diagrama de Contexto - Sistema de Banca por Internet 
+actor "Usuario" as User <<Client>>
+
+
+rectangle "Sistema de Banca por Internet" as BankingSystem {
+
+	package "Frontend" {
+		component "Aplicación Móvil" as MobileApp <<Mobile App>> 
+		component "SPA" as SPA <<Web App>>
+	}
+
+	package "Backend" {
+		component "API Gateway" as APIGateway <<Integration Layer>> 
+		database "Core Bancario" as CoreBanking <<Backend System>>
+		database "Sistema Independiente" as IndependentSystem <<Backend System>> 
+		component "Servicio de Autenticación (OAuth 2.0)" as AuthService <<Auth Service>> 
+		cloud "Servicios de Notificaciones" as NotificationService <<External Service>>
+		component "Microservicio de Consulta de Datos Básicos" as BasicDataService <<Microservice>> 
+		component "Microservicio de Consulta de Movimientos" as MovementsService <<Microservice>> 
+		component "Microservicio de Transferencias" as TransfersService <<Microservice>>
+		component "Servicio de Reconocimiento Facial" as FacialRecognition <<Facial Recognition>> 
+		database "Base de Datos de Auditoría" as AuditDB <<Database>>
+	}
+}
+
+User --> MobileApp : Usa User --> SPA : Usa
+MobileApp --> APIGateway : Conecta a 
+SPA --> APIGateway : Conecta a
+
+APIGateway --> BasicDataService : Solicita Datos 
+APIGateway --> MovementsService : Solicita Movimientos 
+APIGateway --> TransfersService : Realiza Transferencias 
+APIGateway --> AuthService : Autenticación OAuth 2.0 
+APIGateway --> NotificationService : Envía Notificaciones
+APIGateway --> FacialRecognition : Onboarding con Reconocimiento Facial
+
+BasicDataService --> CoreBanking : Consulta Datos 
+MovementsService --> CoreBanking : Consulta Movimientos 
+TransfersService --> CoreBanking : Ejecuta Transferencia
+CoreBanking --> IndependentSystem : Consulta Datos Adicionales 
+CoreBanking --> AuditDB : Registra Eventos
+TransfersService --> AuditDB : Registra Transferencia
+
+@enduml
+
